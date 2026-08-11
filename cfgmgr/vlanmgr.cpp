@@ -1006,3 +1006,28 @@ void VlanMgr::doTask(Consumer &consumer)
         throw runtime_error("VlanMgr doTask failure.");
     }
 }
+
+// Per-VLAN MAC learning disable support
+void VlanMgr::parseLearnDisable(const KeyOpFieldsValuesTuple& t, string& learn_disable)
+{
+    for (size_t i = 0; i < kfvFieldCount(t); i++)
+    {
+        if (fvField(t, i) == "learn_disable")
+        {
+            learn_disable = fvValue(t, i);
+            SWSS_LOG_INFO("Parsed learn_disable: %s", learn_disable.c_str());
+            break;
+        }
+    }
+}
+
+void VlanMgr::forwardLearnDisableToApplDb(const string& key, const string& learn_disable, vector<FieldValueTuple>& fvVector)
+{
+    if (!learn_disable.empty())
+    {
+        FieldValueTuple ld("learn_disable", learn_disable);
+        fvVector.push_back(ld);
+        SWSS_LOG_NOTICE("Forwarding learn_disable=%s for %s to APPL_DB",
+                learn_disable.c_str(), key.c_str());
+    }
+}

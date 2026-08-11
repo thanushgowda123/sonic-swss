@@ -11996,3 +11996,26 @@ void PortsOrch::doTask(swss::SelectableTimer &timer)
         m_port_state_poller->stop();
     }
 }
+
+// Per-VLAN MAC learning disable support - SAI programming
+void PortsOrch::setProgramSaiVlanLearnDisable(const string& learn_disable, sai_object_id_t vlan_oid)
+{
+    if (!learn_disable.empty())
+    {
+        sai_attribute_t attr;
+        attr.id = SAI_VLAN_ATTR_LEARN_DISABLE;
+        attr.value.booldata = (learn_disable == "true");
+        
+        sai_status_t status = sai_vlan_api->set_vlan_attribute(vlan_oid, &attr);
+        if (status != SAI_STATUS_SUCCESS)
+        {
+            SWSS_LOG_ERROR("Failed to set learn_disable=%s on VLAN OID %" PRIx64 ", rv:%d",
+                    learn_disable.c_str(), vlan_oid, status);
+        }
+        else
+        {
+            SWSS_LOG_NOTICE("Successfully set SAI_VLAN_ATTR_LEARN_DISABLE=%s on VLAN OID %" PRIx64,
+                    learn_disable.c_str(), vlan_oid);
+        }
+    }
+}
